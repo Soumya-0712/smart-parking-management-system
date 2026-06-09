@@ -1,6 +1,7 @@
 import express from "express";
 import errorHandler from "./middleware/error.middleware.js";
 import testRouter from "./routes/test.routes.js";
+import authRouter from "./routes/auth.routes.js";
 
 const app = express();
 
@@ -19,6 +20,8 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/v1/test", testRouter);
+
+app.use("/api/v1/auth", authRouter);
 
 app.use(errorHandler);
 
