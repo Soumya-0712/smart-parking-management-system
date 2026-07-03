@@ -8,20 +8,20 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  password  String
-  phone     String
-  role      UserRole  @default(USER)
-  isEmailVerified          Boolean  @default(false)
-  emailVerificationToken   String?
-  emailVerificationExpiry  DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  bookings  Booking[]
-  vehicles  Vehicle[]
+  id                      String    @id @default(uuid())
+  name                    String
+  email                   String    @unique
+  password                String
+  phone                   String
+  role                    UserRole  @default(USER)
+  isEmailVerified         Boolean   @default(false)
+  emailVerificationToken  String?
+  emailVerificationExpiry DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  deletedAt               DateTime?
+  bookings                Booking[]
+  vehicles                Vehicle[]
 
   @@map("users")
 }
@@ -42,7 +42,7 @@ model Vehicle {
 }
 
 model ParkingLot {
-  id           String        @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
   description  String?
   address      String
@@ -52,11 +52,13 @@ model ParkingLot {
   longitude    Float
   pricePerHour Decimal
   totalSlots   Int
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
-  slots        ParkingSlot[]
+
+  slots    ParkingSlot[]
+  bookings Booking[]
 
   @@map("parking_lots")
 }
@@ -80,28 +82,45 @@ model ParkingSlot {
 }
 
 model Booking {
-  id            String        @id @default(uuid())
-  userId        String
-  vehicleId     String
-  slotId        String
-  startTime     DateTime
-  endTime       DateTime
-  totalAmount   Decimal
+  id String @id @default(uuid())
+
+  userId    String
+  vehicleId String
+  lotId     String
+  slotId    String
+
+  bookingReference String @unique
+
+  durationHours Int
+
+  startTime DateTime
+  endTime   DateTime
+
+  totalAmount Decimal
+
   bookingStatus BookingStatus @default(PENDING_PAYMENT)
-  expiresAt     DateTime?
-  qrCode        String?
-  qrExpiresAt   DateTime?
-  entryTime     DateTime?
-  exitTime      DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  slot          ParkingSlot   @relation(fields: [slotId], references: [id])
-  user          User          @relation(fields: [userId], references: [id])
-  vehicle       Vehicle       @relation(fields: [vehicleId], references: [id])
-  payment       Payment?
+
+  expiresAt DateTime?
+
+  qrCode      String?
+  qrExpiresAt DateTime?
+
+  entryTime DateTime?
+  exitTime  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User        @relation(fields: [userId], references: [id])
+  vehicle Vehicle     @relation(fields: [vehicleId], references: [id])
+  lot     ParkingLot  @relation(fields: [lotId], references: [id])
+  slot    ParkingSlot @relation(fields: [slotId], references: [id])
+
+  payment Payment?
 
   @@index([userId])
   @@index([vehicleId])
+  @@index([lotId])
   @@index([slotId])
   @@map("bookings")
 }
@@ -154,8 +173,9 @@ enum SlotStatus {
 enum BookingStatus {
   PENDING_PAYMENT
   CONFIRMED
-  CANCELLED
+  ACTIVE
   COMPLETED
+  CANCELLED
   EXPIRED
 }
 
