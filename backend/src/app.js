@@ -7,6 +7,7 @@ import parkingLotRoutes from "./routes/parking-lot.routes.js";
 import parkingSlotRoutes from "./routes/parking-slot.routes.js";
 import vehicleRoutes from "./routes/vehicle.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 
 const app = express();
 
@@ -36,6 +37,8 @@ app.use("/api/v1/parking-slots", parkingSlotRoutes);
 app.use("/api/v1/vehicle", vehicleRoutes);
 
 app.use("/api/v1/bookings", bookingRoutes);
+
+app.use("/api/v1/payments", paymentRoutes);
 
 app.use(errorHandler);
 
