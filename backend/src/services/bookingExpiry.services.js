@@ -53,6 +53,7 @@ const expireBookings = async () => {
         if (updatedBooking.count === 0) {
           return;
         }
+        i;
 
         // Update Payment
 
