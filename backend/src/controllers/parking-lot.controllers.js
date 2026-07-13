@@ -20,6 +20,8 @@ const createParkingLotController = asyncHandler(async (req, res) => {
     latitude,
     longitude,
     pricePerHour,
+    gracePeriodMinutes,
+    overstayRate,
     totalSlots,
   } = req.body;
 
@@ -31,7 +33,9 @@ const createParkingLotController = asyncHandler(async (req, res) => {
     latitude === undefined ||
     longitude === undefined ||
     !pricePerHour ||
-    !totalSlots
+    !totalSlots ||
+    !gracePeriodMinutes ||
+    !overstayRate
   ) {
     throw new ApiError(400, "All required fields must be provided");
   }
