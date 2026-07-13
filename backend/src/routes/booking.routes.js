@@ -7,6 +7,7 @@ import {
   getMyBookingsController,
   getBookingByIdController,
   cancelBookingController,
+  checkInController,
 } from "../controllers/booking.controllers.js";
 
 const router = Router();
@@ -18,5 +19,11 @@ router.get("/", verifyJWT, getMyBookingsController);
 router.get("/:bookingId", verifyJWT, getBookingByIdController);
 
 router.patch("/:bookingId/cancel", verifyJWT, cancelBookingController);
+
+router.post("/check-in", verifyJWT, checkInController);
+
+router.patch("/:bookingId/checkout", verifyJWT, checkoutController);
+
+router.get("/:bookingId/gate-status", verifyJWT, gateStatusController);
 
 export default router;

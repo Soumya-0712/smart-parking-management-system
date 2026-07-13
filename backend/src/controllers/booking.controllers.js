@@ -7,6 +7,8 @@ import {
   getMyBookings,
   getBookingById,
   cancelBooking,
+  checkIn,
+  getGateStatus,
 } from "../services/booking.services.js";
 
 const createBookingController = asyncHandler(async (req, res) => {
@@ -68,9 +70,54 @@ const cancelBookingController = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, booking, "Booking cancelled successfully"));
 });
 
+const checkInController = asyncHandler(async (req, res) => {
+  const { qrToken } = req.body;
+
+  if (!qrToken?.trim()) {
+    throw new ApiError(400, "QR Code is required");
+  }
+
+  const booking = await checkIn(qrToken);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, booking, "Vehicle checked in successfully"));
+});
+
+const checkoutController = asyncHandler(async (req, res) => {
+  const { bookingId } = req.params;
+
+  if (!bookingId?.trim()) {
+    throw new ApiError(400, "Booking ID is required");
+  }
+
+  const result = await checkOut(req.user.id, bookingId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, result, "Checkout processed successfully"));
+});
+
+const gateStatusController = asyncHandler(async (req, res) => {
+  const { bookingId } = req.params;
+
+  if (!bookingId?.trim()) {
+    throw new ApiError(400, "Booking ID is required");
+  }
+
+  const status = await getGateStatus(req.user.id, bookingId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, status, "Gate status fetched successfully"));
+});
+
 export {
   createBookingController,
   getMyBookingsController,
   getBookingByIdController,
   cancelBookingController,
+  checkInController,
+  checkoutController,
+  gateStatusController,
 };
