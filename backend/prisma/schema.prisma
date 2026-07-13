@@ -51,6 +51,9 @@ model ParkingLot {
   latitude     Float
   longitude    Float
   pricePerHour Decimal
+  gracePeriodMinutes  Int      @default(15)
+
+  overstayRate        Decimal @default(100)
   totalSlots   Int
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
@@ -97,12 +100,16 @@ model Booking {
   endTime   DateTime
 
   totalAmount Decimal
+  
+  overstayMinutes Int @default(0)
+
+  overstayAmount Decimal @default(0)
 
   bookingStatus BookingStatus @default(PENDING_PAYMENT)
 
   expiresAt DateTime?
 
-  qrCode      String?
+  qrToken String? @unique
   qrExpiresAt DateTime?
 
   entryTime DateTime?
@@ -116,12 +123,16 @@ model Booking {
   lot     ParkingLot  @relation(fields: [lotId], references: [id])
   slot    ParkingSlot @relation(fields: [slotId], references: [id])
 
-  payment Payment?
 
+
+  payments Payment[]
+
+  @@index([bookingStatus, endTime])
   @@index([userId])
   @@index([vehicleId])
   @@index([lotId])
   @@index([slotId])
+  @@index([bookingStatus])
   @@map("bookings")
 }
 
@@ -129,7 +140,8 @@ model Payment {
 
   id String @id @default(uuid())
 
-  bookingId String @unique
+  bookingId String
+
 
   razorpayOrderId String?
 
@@ -139,15 +151,22 @@ model Payment {
 
   amount Decimal
 
+  description String?
+
   currency String @default("INR")
 
   paymentMethod PaymentMethod?
 
   paymentStatus PaymentStatus @default(PENDING)
 
+
+  paymentType PaymentType @default(BOOKING)
+  paidAt DateTime?
+
   failureReason String?
 
   refundedAt DateTime?
+  refundAmount Decimal? @default(0)
 
   createdAt DateTime @default(now())
 
@@ -155,6 +174,9 @@ model Payment {
 
   booking Booking @relation(fields:[bookingId],references:[id])
 
+  @@index([paymentStatus])
+  @@index([bookingId, paymentType])
+  @@index([paymentType])
   @@index([bookingId])
 
   @@map("payments")
@@ -187,12 +209,21 @@ enum SlotStatus {
 }
 
 enum BookingStatus {
-  PENDING_PAYMENT
-  CONFIRMED
-  ACTIVE
-  COMPLETED
-  CANCELLED
-  EXPIRED
+
+PENDING_PAYMENT
+
+CONFIRMED
+
+ACTIVE
+
+OVERSTAY_PAYMENT_PENDING
+
+COMPLETED
+
+CANCELLED
+
+EXPIRED
+
 }
 
 enum PaymentStatus {
@@ -207,4 +238,12 @@ enum PaymentMethod {
   UPI
   NET_BANKING
   WALLET
+}
+
+
+
+enum PaymentType {
+  BOOKING
+  OVERSTAY
+  REFUND
 }
