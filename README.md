@@ -106,29 +106,44 @@ npx prisma migrate dev
 npm run dev
 ```
 
+After copying `.env.example` to `.env`, fill in your own values (database credentials, JWT secret, Razorpay keys, etc.) before starting the server.
+
 ## 📂 Project Structure
 
 ```text
 backend/
+├── node_modules/
 ├── prisma/
 │   ├── schema.prisma
 │   └── migrations/
 ├── src/
 │   ├── config/
+│   │   ├── prisma.js
+│   │   └── razorpay.js
 │   ├── constants/
 │   ├── controllers/
-│   ├── cron/
-│   ├── middlewares/
+│   ├── jobs/
+│   ├── middleware/
 │   ├── routes/
 │   ├── services/
 │   ├── utils/
-│   ├── validations/
 │   ├── app.js
-│   └── index.js
+│   └── server.js
+├── .env
 ├── .env.example
+├── .gitignore
+├── package-lock.json
 ├── package.json
-└── README.md
+├── prisma.config.ts
+└── tsconfig.json
+docs/
+frontend/
+.gitignore
+LICENSE
+README.md
 ```
+
+> **Note:** `.env` holds real secrets and is git-ignored — never commit it. `.env.example` lists the required variable names with empty/placeholder values so anyone cloning the repo knows what to configure.
 
 ## 🏛 Architecture
 
