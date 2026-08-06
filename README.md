@@ -4,6 +4,7 @@
 ![Express.js](https://img.shields.io/badge/Express.js-5.x-black)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748)
+![Swagger](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 A full-stack Smart Parking Management System designed to streamline urban parking through real-time slot management, secure vehicle registration, online booking, digital payments, and QR code-based entry and exit.
@@ -12,9 +13,23 @@ The project is being developed with a scalable backend architecture using Node.j
 
 ## 📖 Overview
 
-The Smart Parking Management System is a production-oriented backend application designed to digitize parking operations. It supports secure user authentication, vehicle management, online booking, Razorpay payment integration, QR code-based vehicle entry and exit, automatic booking expiry, and intelligent overstay handling.
+The Smart Parking Management System is a production-oriented backend application designed to digitize parking operations. It supports secure user authentication with email verification, vehicle management, online booking, Razorpay payment integration, QR code-based vehicle entry and exit, automatic booking expiry, intelligent overstay handling, and admin analytics — all documented through an interactive Swagger (OpenAPI) interface.
 
 The project follows a layered architecture and emphasizes scalability, security, and maintainability using modern backend development practices.
+
+## 🌟 Project Highlights
+
+- Production-oriented layered backend architecture
+- JWT Authentication with Email Verification
+- Password Recovery Workflow
+- Role-Based Access Control (RBAC)
+- QR Code-Based Parking Check-In
+- Razorpay Payment Integration (backend implemented)
+- Automatic Booking Expiry Scheduler
+- Overstay Detection & Billing
+- Admin Dashboard & Analytics
+- Swagger (OpenAPI) Documentation
+- Prisma ORM with PostgreSQL
 
 ## ✨ Features
 
@@ -23,7 +38,11 @@ The project follows a layered architecture and emphasizes scalability, security,
 #### Authentication & Authorization
 
 - User Registration
+- Email Verification
+- Resend Verification Email
 - User Login
+- Forgot Password
+- Reset Password
 - JWT Authentication
 - Role-Based Access Control (RBAC)
 - Ownership-Based Authorization
@@ -53,6 +72,8 @@ The project follows a layered architecture and emphasizes scalability, security,
 - Booking Payments
 - Overstay Payments
 
+> ⚠️ **Note:** The payment flow is fully implemented on the backend (order creation, signature verification, transaction-safe status updates), but end-to-end testing is still pending frontend integration. Treat this module as backend-complete but not yet production-verified.
+
 #### Smart Parking Workflow
 
 - QR Token Generation
@@ -63,15 +84,17 @@ The project follows a layered architecture and emphasizes scalability, security,
 - Automatic Overstay Calculation
 - Automatic Slot Release
 
+#### Admin & Documentation
+
+- Admin Dashboard APIs
+- Booking & Revenue Statistics
+- Swagger (OpenAPI) Documentation
+
 ### 🚀 Future Enhancements
 
-- Booking History
-- Dashboard Analytics
-- Revenue Reports
 - Google Maps Integration
 - Real-Time Slot Availability (WebSockets)
-- Email Notifications
-- Admin Dashboard
+- Admin Dashboard Frontend
 - React Frontend
 - Docker Deployment
 - CI/CD Pipeline
@@ -89,6 +112,8 @@ The project follows a layered architecture and emphasizes scalability, security,
 - Multi-Payment Architecture
 - Secure Razorpay Signature Verification
 - Modular Service Design
+- Swagger (OpenAPI) Documentation
+- Interactive API Testing
 
 ## ⚙️ Installation
 
@@ -106,7 +131,7 @@ npx prisma migrate dev
 npm run dev
 ```
 
-After copying `.env.example` to `.env`, fill in your own values (database credentials, JWT secret, Razorpay keys, etc.) before starting the server.
+After copying `.env.example` to `.env`, fill in your own values (database credentials, JWT secret, Razorpay keys, Nodemailer/Mailtrap credentials, etc.) before starting the server.
 
 ## 📂 Project Structure
 
@@ -122,10 +147,13 @@ backend/
 │   │   └── razorpay.js
 │   ├── constants/
 │   ├── controllers/
+│   ├── docs/
+│   ├── helpers/
 │   ├── jobs/
 │   ├── middleware/
 │   ├── routes/
 │   ├── services/
+│   ├── templates/
 │   ├── utils/
 │   ├── app.js
 │   └── server.js
@@ -166,6 +194,18 @@ README.md
           PostgreSQL
 ```
 
+## 📘 API Documentation
+
+The backend APIs are documented using **Swagger (OpenAPI 3.0)**.
+
+During development, the interactive documentation is available at:
+
+```text
+http://localhost:5000/api-docs
+```
+
+After deployment, this endpoint will be accessible through the deployed backend URL.
+
 ## 🗄 Database Design
 
 Core Entities
@@ -197,17 +237,20 @@ Relationships
 
 - Node.js
 - Express.js
-- Prisma ORM
 - PostgreSQL
-- JWT Authentication
+- Prisma ORM
+- JWT
 - Bcrypt
+- Nodemailer
 - Razorpay SDK
 - QRCode
 - Node Cron
+- Swagger (OpenAPI)
 
 ### External Services
 
 - Razorpay
+- Mailtrap (Development Email Testing)
 - Google Maps API (Planned)
 
 ## 🏗 Development Principles
@@ -227,7 +270,11 @@ Relationships
 ### Authentication
 
 - Register
+- Verify Email
+- Resend Verification Email
 - Login
+- Forgot Password
+- Reset Password
 - Logout
 - Get Current User
 
@@ -272,46 +319,52 @@ Relationships
 
 ### Payments
 
-- Create Booking Payment
-- Verify Booking Payment
-- Create Overstay Payment
-- Verify Overstay Payment
-- Multi-Payment Support
-- Razorpay Integration
+- Create Payment Order
+- Verify Razorpay Payment
+- Payment History
+
+> Backend logic (order creation, signature verification, overstay billing) is implemented; end-to-end verification is pending frontend integration and has not yet been tested against a live checkout flow.
+
+### Dashboard (Admin)
+
+- Dashboard Summary
+- Booking Statistics
+- Revenue Statistics
 
 ## 🚧 Project Status
 
-**Current Phase:** Backend Development (Core Backend Completed)
+**Current Phase:** Backend Completed ✅
 
-The core backend modules have been implemented, including authentication, booking lifecycle, QR-based check-in/check-out, payment processing, automatic booking expiry, and overstay management.
+Core backend modules, authentication workflow, payment integration, admin analytics, and Swagger documentation have been implemented. Payment endpoints are complete on the backend but still await end-to-end testing once frontend integration begins.
 
-The next phase focuses on administrative features, analytics, frontend development, and deployment.
+The next phase focuses on frontend development and cloud deployment.
 
 ### Completed Modules
 
 - Authentication & Authorization
+- Email Verification
+- Password Recovery
+- Vehicle Management
 - Parking Lot Management
 - Parking Slot Management
-- Vehicle Management
 - Booking Lifecycle
-- Payment System
+- Payment System (backend implemented; end-to-end testing pending)
 - QR Check-In
 - QR Check-Out
 - Booking Expiry Scheduler
 - Overstay Management
+- Admin Dashboard APIs
+- Swagger Documentation
 
 ### Currently Working On
 
-- Admin Dashboard APIs
-- Booking Analytics
+- Frontend integration for end-to-end payment testing
+- React.js frontend development
 
 ### 📌 Upcoming Modules
 
 #### Backend
 
-- Admin Dashboard APIs
-- Booking History & Pagination
-- Analytics & Revenue Reports
 - Google Maps Integration
 - Real-Time Slot Availability (WebSockets)
 
@@ -329,22 +382,23 @@ The next phase focuses on administrative features, analytics, frontend developme
 ## 🚀 Roadmap
 
 - [x] Authentication & Authorization
+- [x] Email Verification & Password Recovery
 - [x] Parking Lot Management
 - [x] Parking Slot Management
 - [x] Vehicle Management
 - [x] Booking Lifecycle
-- [x] Razorpay Integration
+- [x] Razorpay Integration (backend; pending E2E test)
 - [x] QR-Based Check-In
 - [x] QR-Based Check-Out
 - [x] Booking Expiry Scheduler
 - [x] Overstay Management
+- [x] Dashboard Analytics (incl. Booking History)
+- [x] Swagger Documentation
 
-- [ ] Booking History
-- [ ] Dashboard Analytics
 - [ ] Google Maps Integration
 - [ ] Real-Time Slot Availability
-- [ ] Email Notifications
-- [ ] Admin Dashboard
+- [ ] Email Notifications (beyond auth flow)
+- [ ] Admin Dashboard Frontend
 - [ ] React Frontend
 - [ ] Docker Deployment
 - [ ] CI/CD Pipeline
