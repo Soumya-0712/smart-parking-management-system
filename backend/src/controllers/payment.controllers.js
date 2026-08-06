@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import {
   createPaymentOrder,
   verifyPayment,
+  getPayments,
 } from "../services/payment.services.js";
 
 const createPaymentOrderController = asyncHandler(async (req, res) => {
@@ -48,4 +49,21 @@ const verifyPaymentController = asyncHandler(async (req, res) => {
     );
 });
 
-export { createPaymentOrderController, verifyPaymentController };
+const getPaymentController = asyncHandler(async (req, res) => {
+  const filters = req.query;
+  const userId = req.user.id;
+
+  const payments = await getPayments(userId, filters);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, payments, "Payments History Fetched succesfully"),
+    );
+});
+
+export {
+  createPaymentOrderController,
+  verifyPaymentController,
+  getPaymentController,
+};

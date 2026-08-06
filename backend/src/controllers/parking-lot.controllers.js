@@ -50,6 +50,8 @@ const createParkingLotController = asyncHandler(async (req, res) => {
     longitude,
     pricePerHour,
     totalSlots,
+    overstayRate,
+    gracePeriodMinutes,
   });
 
   return res

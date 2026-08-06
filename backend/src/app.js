@@ -1,3 +1,5 @@
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./docs/swagger.js";
 import express from "express";
 import errorHandler from "./middleware/error.middleware.js";
 import testRouter from "./routes/test.routes.js";
@@ -8,11 +10,14 @@ import parkingSlotRoutes from "./routes/parking-slot.routes.js";
 import vehicleRoutes from "./routes/vehicle.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import dashBoardRoutes from "./routes/dashboard.routes.js";
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => {
   res.send("Smart Parking Backend Running 🚀");
@@ -39,6 +44,8 @@ app.use("/api/v1/vehicle", vehicleRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
 
 app.use("/api/v1/payments", paymentRoutes);
+
+app.use("/api/v1/dashboard", dashBoardRoutes);
 
 app.use(errorHandler);
 

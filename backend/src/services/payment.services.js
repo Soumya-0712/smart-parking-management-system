@@ -10,6 +10,9 @@ import crypto from "crypto";
 import { generateBookingQRCode } from "./qrCode.services.js";
 import { SLOT_STATUS } from "../constants/parking.constants.js";
 
+import { paymentFilters } from "../helpers/build-payment-filters.js";
+import { buildbookingfilters } from "../helpers/build-booking-filters.js";
+
 const createRazorpayOrder = async ({
   booking,
   amount,
@@ -49,11 +52,6 @@ const createRazorpayOrder = async ({
       },
     });
 
-    // NOTE (Issue 8, undecided policy): a previously FAILED payment for this
-    // booking/paymentType is not reused here — every retry creates a fresh
-    // PENDING payment row. Only a still-PENDING row blocks a new order.
-    // Decide explicitly whether FAILED rows should instead be reused/marked
-    // stale; leaving as-is (create fresh) for now.
     if (existingPayment) {
       throw new ApiError(409, `${paymentType} payment already initiated.`);
     }
@@ -99,11 +97,6 @@ const createPaymentOrder = async (userId, bookingId) => {
       userId,
     },
 
-    // Issue 2: slotId/endTime removed again — createPaymentOrder and
-    // verifyPayment are separate requests (the user leaves to complete
-    // checkout on Razorpay's side in between), so verifyPayment always
-    // needs its own fresh fetch anyway. Selecting them here just fetches
-    // columns that get discarded when this function returns.
     select: {
       id: true,
 
@@ -181,16 +174,10 @@ const verifyBookingPayment = async ({
   razorpay_payment_id,
   razorpay_signature,
 }) => {
-  // Issue 5: generateBookingQRCode() takes no args now — confirm
-  // qrCode.services.js has actually been updated to match this signature.
   const { qrToken, qrImage } = await generateBookingQRCode();
   const qrExpiresAt = booking.endTime;
 
   const updatedBooking = await prisma.$transaction(async (tx) => {
-    // Issue 1: paymentType included in the guard, matching
-    // verifyOverstayPayment, so a payment.id that ever belonged to a
-    // different paymentType (e.g. REFUND) can never be flipped to SUCCESS
-    // by this code path.
     const updatedPayment = await tx.payment.updateMany({
       where: {
         id: payment.id,
@@ -209,11 +196,6 @@ const verifyBookingPayment = async ({
       throw new ApiError(409, "Payment already processed.");
     }
 
-    // Issue 4: Payment -> Booking -> Slot. Booking is the business source
-    // of truth; slot status is just inventory bookkeeping, so it reads
-    // more naturally updated last. All three still happen atomically
-    // inside this $transaction, so ordering here is about readability,
-    // not correctness — a thrown error at any step rolls everything back.
     const updateBooking = await tx.booking.update({
       where: {
         id: booking.id,
@@ -268,10 +250,6 @@ const verifyBookingPayment = async ({
     return updateBooking;
   });
 
-  // Response shape now matches verifyOverstayPayment: a flat booking
-  // object plus extra fields, rather than nesting it under
-  // `updatedBooking`. Also returns paymentType explicitly (Improvement)
-  // so the frontend doesn't have to infer which flow just ran.
   return { ...updatedBooking, paymentType: PAYMENT_TYPE.BOOKING, qrImage };
 };
 
@@ -387,10 +365,6 @@ const verifyPayment = async (
     },
 
     include: {
-      // Issue 7: scoped to the exact razorpayOrderId being verified, not
-      // just "any pending payment" — protects against picking the wrong
-      // row if a booking ever has multiple concurrent PENDING payments
-      // (e.g. a pending refund alongside a pending overstay charge).
       payments: {
         where: {
           paymentStatus: PAYMENT_STATUS.PENDING,
@@ -488,4 +462,117 @@ const verifyPayment = async (
   }
 };
 
-export { createPaymentOrder, verifyPayment };
+const getPayments = async (userId, filters) => {
+  let {
+    page = 1,
+    limit = 10,
+    search,
+    paymentMethod,
+    paymentType,
+    paymentStatus,
+    from,
+    to,
+    sort = "desc",
+  } = filters;
+
+  page = Number(page);
+  limit = Number(limit);
+
+  if (Number.isNaN(page) || page < 1) {
+    page = 1;
+  }
+  if (Number.isNaN(limit) || limit < 1) {
+    limit = 10;
+  }
+
+  limit = Math.min(limit, 100);
+
+  const skip = (page - 1) * limit;
+
+  const where = paymentFilters({
+    userId,
+    search,
+    paymentMethod,
+    paymentType,
+    paymentStatus,
+    from,
+    to,
+  });
+
+  const [totalPayments, filteredPaymentRecords] = await prisma.$transaction([
+    prisma.payment.count({
+      where,
+    }),
+    prisma.payment.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: sort === "asc" ? "asc" : "desc",
+      },
+
+      select: {
+        id: true,
+
+        amount: true,
+
+        currency: true,
+
+        paymentStatus: true,
+
+        paymentType: true,
+
+        paymentMethod: true,
+
+        description: true,
+
+        paidAt: true,
+
+        createdAt: true,
+
+        booking: {
+          select: {
+            id: true,
+            bookingReference: true,
+            bookingStatus: true,
+            startTime: true,
+            endTime: true,
+            entryTime: true,
+            exitTime: true,
+            overstayMinutes: true,
+            overstayAmount: true,
+            vehicle: {
+              select: {
+                id: true,
+                vehicleNumber: true,
+                vehicleType: true,
+              },
+            },
+            lot: {
+              select: {
+                id: true,
+                name: true,
+                city: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  return {
+    filteredPaymentRecords,
+
+    pagination: {
+      page,
+      limit,
+      totalPayments,
+      totalPages: Math.ceil(totalPayments / limit) || 1,
+      hasNextPage: page * limit < totalPayments,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export { createPaymentOrder, verifyPayment, getPayments };

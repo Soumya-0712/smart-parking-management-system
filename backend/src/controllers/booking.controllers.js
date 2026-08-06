@@ -37,8 +37,8 @@ const createBookingController = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, booking, "Booking created successfully"));
 });
 
-const getMyBookingsController = asyncHandler(async (req, res) => {
-  const bookings = await getMyBookings(req.user.id);
+const getBookingsController = asyncHandler(async (req, res) => {
+  const bookings = await getMyBookings(req.user.id, req.query);
 
   return res
     .status(200)
@@ -84,7 +84,7 @@ const checkInController = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, booking, "Vehicle checked in successfully"));
 });
 
-const checkoutController = asyncHandler(async (req, res) => {
+const checkOutController = asyncHandler(async (req, res) => {
   const { bookingId } = req.params;
 
   if (!bookingId?.trim()) {
@@ -114,10 +114,10 @@ const gateStatusController = asyncHandler(async (req, res) => {
 
 export {
   createBookingController,
-  getMyBookingsController,
+  getBookingsController,
   getBookingByIdController,
   cancelBookingController,
   checkInController,
-  checkoutController,
+  checkOutController,
   gateStatusController,
 };
