@@ -144,7 +144,8 @@ backend/
 ├── src/
 │   ├── config/
 │   │   ├── prisma.js
-│   │   └── razorpay.js
+│   │   ├── razorpay.js
+│   │   └── mail.config.js
 │   ├── constants/
 │   ├── controllers/
 │   ├── docs/
