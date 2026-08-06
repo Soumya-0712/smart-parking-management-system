@@ -1,22 +1,74 @@
 import { Router } from "express";
+
 import { verifyJWT } from "../middleware/auth.middleware.js";
+
 import {
   registerController,
   loginController,
-  getCurrentUser,
   logoutController,
-} from "../controllers/auth.controller.js";
-import { authorizeRoles } from "../middleware/role.middleware.js";
-import { USER_ROLES } from "../constants/roles.js";
+  getCurrentUser,
+  verifyEmailController,
+  resendVerificationEmailController,
+  forgotPasswordController,
+  resetPasswordController,
+} from "../controllers/auth.controllers.js";
 
 const router = Router();
 
+/**
+ * @route POST /api/v1/auth/register
+ * @desc Register a new user
+ * @access Public
+ */
 router.post("/register", registerController);
 
+/**
+ * @route POST /api/v1/auth/verify-email
+ * @desc Verify user's email address
+ * @access Public
+ */
+router.post("/verify-email", verifyEmailController);
+
+/**
+ * @route POST /api/v1/auth/resend-verification-email
+ * @desc Resend email verification link
+ * @access Public
+ */
+router.post("/resend-verification-email", resendVerificationEmailController);
+
+/**
+ * @route POST /api/v1/auth/login
+ * @desc Login user
+ * @access Public
+ */
 router.post("/login", loginController);
 
-router.get("/me", verifyJWT, getCurrentUser);
+/**
+ * @route POST /api/v1/auth/forgot-password
+ * @desc Forgot Password
+ * @access Public
+ */
+router.post("/forgot-password", forgotPasswordController);
 
+/**
+ * @route POST /api/v1/auth/reset-password
+ * @desc Reset Password for User
+ * @access Public
+ */
+router.post("/reset-password", resetPasswordController);
+
+/**
+ * @route POST /api/v1/auth/logout
+ * @desc Logout current user
+ * @access Private
+ */
 router.post("/logout", verifyJWT, logoutController);
+
+/**
+ * @route GET /api/v1/auth/me
+ * @desc Get current logged-in user
+ * @access Private
+ */
+router.get("/me", verifyJWT, getCurrentUser);
 
 export default router;
