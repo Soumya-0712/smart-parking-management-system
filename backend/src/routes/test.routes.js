@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   testController,
   testDatabaseConnection,
-} from "../controllers/test.controller.js";
+} from "../controllers/test.controllers.js";
 
 const router = Router();
 
