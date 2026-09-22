@@ -24,7 +24,7 @@ router.patch("/:bookingId/cancel", verifyJWT, cancelBookingController);
 
 router.post("/check-in", verifyJWT, checkInController);
 
-router.patch("/:bookingId/checkout", verifyJWT, checkOutController);
+router.post("/check-out", verifyJWT, checkOutController);
 
 router.get("/:bookingId/gate-status", verifyJWT, gateStatusController);
 

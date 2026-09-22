@@ -8,11 +8,12 @@ import {
   getBookingById,
   cancelBooking,
   checkIn,
+  checkOut,
   getGateStatus,
 } from "../services/booking.services.js";
 
 const createBookingController = asyncHandler(async (req, res) => {
-  const { slotId, vehicleId, durationHours } = req.body;
+  const { slotId, vehicleId, startTime, endTime } = req.body;
 
   if (!slotId?.trim()) {
     throw new ApiError(400, "Parking Slot ID is required");
@@ -22,14 +23,19 @@ const createBookingController = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Vehicle ID is required");
   }
 
-  if (durationHours === undefined || Number.isNaN(Number(durationHours))) {
-    throw new ApiError(400, "Duration Hours must be a valid number");
+  if (!startTime?.trim()) {
+    throw new ApiError(400, "Start Time is required");
+  }
+
+  if (!endTime?.trim()) {
+    throw new ApiError(400, "End Time is required");
   }
 
   const booking = await createBooking(req.user.id, {
     slotId,
     vehicleId,
-    durationHours: Number(durationHours),
+    startTime,
+    endTime,
   });
 
   return res
@@ -53,7 +59,9 @@ const getBookingByIdController = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, booking, "Booking Details Fetched Succesfully"));
+    .json(
+      new ApiResponse(200, booking, "Booking Details Fetched Successfully"),
+    );
 });
 
 const cancelBookingController = asyncHandler(async (req, res) => {
@@ -85,17 +93,17 @@ const checkInController = asyncHandler(async (req, res) => {
 });
 
 const checkOutController = asyncHandler(async (req, res) => {
-  const { bookingId } = req.params;
+  const { qrToken } = req.body;
 
-  if (!bookingId?.trim()) {
-    throw new ApiError(400, "Booking ID is required");
+  if (!qrToken?.trim()) {
+    throw new ApiError(400, "QR Code is required");
   }
 
-  const result = await checkOut(req.user.id, bookingId);
+  const result = await checkOut(qrToken);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, result, "Checkout processed successfully"));
+    .json(new ApiResponse(200, result, "Vehicle checked out successfully"));
 });
 
 const gateStatusController = asyncHandler(async (req, res) => {

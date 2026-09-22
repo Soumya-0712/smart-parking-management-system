@@ -63,6 +63,7 @@ const loginController = asyncHandler(async (req, res) => {
   });
 
   const accessToken = generateAccessToken(user);
+
   const userResponse = {
     id: user.id,
     name: user.name,
@@ -92,13 +93,20 @@ const logoutController = asyncHandler(async (req, res) => {
 });
 
 const verifyEmailController = asyncHandler(async (req, res) => {
-  const { token } = req.body;
+  const { email, code } = req.body;
 
-  if (!token) {
-    throw new ApiError(400, "Verification token is required.");
+  if (!email?.trim()) {
+    throw new ApiError(400, "Email is required.");
   }
 
-  const result = await verifyEmail(token);
+  if (!code?.trim()) {
+    throw new ApiError(400, "Verification code is required.");
+  }
+
+  const result = await verifyEmail({
+    email,
+    code,
+  });
 
   return res.status(200).json(new ApiResponse(200, result, result.message));
 });
