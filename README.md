@@ -1,215 +1,333 @@
-# Smart Parking Management System
+# ParkSphere --- Smart Parking Management System
 
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
 ![Express.js](https://img.shields.io/badge/Express.js-5.x-black)
+![React](https://img.shields.io/badge/React-19.x-61DAFB)
+![Vite](https://img.shields.io/badge/Vite-8.x-646CFF)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748)
+![Razorpay](https://img.shields.io/badge/Razorpay-Test%20Mode-3395FF)
 ![Swagger](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-A full-stack Smart Parking Management System designed to streamline urban parking through real-time slot management, secure vehicle registration, online booking, digital payments, and QR code-based entry and exit.
+**ParkSphere** is a full-stack Smart Parking Management System designed
+to digitize parking operations through parking-lot and slot management,
+vehicle registration, online booking, secure payments, QR-based entry
+and exit, automatic booking expiry, overstay handling, and
+administrative analytics.
 
-The project is being developed with a scalable backend architecture using Node.js, Express.js, Prisma ORM, and PostgreSQL, following production-oriented development practices.
+The project uses a layered Node.js/Express backend with Prisma and
+PostgreSQL, together with a React/Vite frontend. The application has
+been developed and tested incrementally end-to-end and is now being
+prepared for cloud deployment.
+
+---
 
 ## 📖 Overview
 
-The Smart Parking Management System is a production-oriented backend application designed to digitize parking operations. It supports secure user authentication with email verification, vehicle management, online booking, Razorpay payment integration, QR code-based vehicle entry and exit, automatic booking expiry, intelligent overstay handling, and admin analytics — all documented through an interactive Swagger (OpenAPI) interface .
+ParkSphere provides two primary experiences:
 
-The project follows a layered architecture and emphasizes scalability, security, and maintainability using modern backend development practices.
+- **User Portal** --- users can register, verify their email, manage
+  vehicles, discover parking availability, create and manage bookings,
+  make payments, and use QR-based parking workflows.
+- **Admin Portal** --- administrators can manage parking lots and
+  slots, monitor bookings and payments, manage users, perform
+  check-in/check-out operations, and view operational analytics.
 
-## 🌟 Project Highlights
+The backend follows a layered architecture:
 
-- Production-oriented layered backend architecture
-- JWT Authentication with Email Verification
-- Password Recovery Workflow
+```text
+Client
+  ↓
+Routes
+  ↓
+Middleware
+  ↓
+Controllers
+  ↓
+Services
+  ↓
+Prisma ORM
+  ↓
+PostgreSQL
+```
+
+This separation keeps HTTP handling, authorization, business logic, and
+database operations organized and maintainable.
+
+---
+
+## ✨ Key Features
+
+### 🔐 Authentication & Authorization
+
+- User registration
+- Email verification using a verification code
+- Verification-code resend workflow
+- User login
+- JWT authentication
+- HTTP-only authentication cookies
 - Role-Based Access Control (RBAC)
-- QR Code-Based Parking Check-In
-- Razorpay Payment Integration (backend implemented)
-- Automatic Booking Expiry Scheduler
-- Overstay Detection & Billing
-- Admin Dashboard & Analytics
-- Swagger (OpenAPI) Documentation
-- Prisma ORM with PostgreSQL
+- Ownership-based authorization
+- Forgot-password workflow
+- Password reset
+- Logout
+- Current-user retrieval
 
-## ✨ Features
+### 🅿️ Parking Management
 
-### ✅ Implemented
+- Parking lot CRUD
+- Parking slot CRUD
+- Slot type management
+- Floor-wise slot management
+- Real-time slot status management
+- Parking lot activation/deactivation
+- Soft deletion
+- Parking availability search
 
-#### Authentication & Authorization
+### 🚗 Vehicle Management
 
-- User Registration
-- Email Verification
-- Resend Verification Email
-- User Login
-- Forgot Password
-- Reset Password
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- Ownership-Based Authorization
+- Vehicle registration
+- Vehicle type management
+- View user vehicles
+- Update vehicle information
+- Delete/soft-delete vehicles
+- Vehicle ownership validation
 
-#### Parking Management
+### 📅 Booking Management
 
-- Parking Lot CRUD
-- Parking Slot CRUD
-- Vehicle Management
-- Real-Time Slot Status Management
+- Parking availability validation
+- Booking creation
+- Booking reference generation
+- Booking duration and amount calculation
+- Booking overlap protection
+- Transaction-based booking creation
+- Race-condition protection
+- Booking cancellation
+- Booking history
+- Booking details
+- Booking expiry
+- No-show handling
+- Grace-period handling
+- Overstay detection
+- Overstay billing
 
-#### Booking Management
+### 💳 Payments
 
-- Create Booking
-- Get Booking Details
-- Cancel Booking
-- Transaction-Based Booking Creation
-- Race Condition Protection
-- Automatic Booking Expiry
-- QR-Based Booking Confirmation
+- Razorpay order creation
+- Razorpay payment signature verification
+- Booking payments
+- Overstay payments
+- Payment history
+- Payment status tracking
+- Refund-oriented payment architecture
+- Transaction-safe booking/payment state updates
 
-#### Payment System
+> **Razorpay is currently intended to be used in Test Mode during
+> deployment and initial production validation. Live payment credentials
+> should only be configured when the application is ready to accept real
+> payments.**
 
-- Razorpay Order Creation
-- Secure Payment Verification
-- Multi-Payment Architecture
-- Booking Payments
-- Overstay Payments
+### 📱 QR Parking Workflow
 
-> ⚠️ **Note:** The payment flow is fully implemented on the backend (order creation, signature verification, transaction-safe status updates), but end-to-end testing is still pending frontend integration. Treat this module as backend-complete but not yet production-verified.
+- Secure QR token generation
+- QR code generation
+- QR-based check-in
+- QR-based check-out
+- QR expiry
+- Entry-time tracking
+- Exit-time tracking
+- Automatic slot release after completion
 
-#### Smart Parking Workflow
+### 👨‍💼 Admin Portal
 
-- QR Token Generation
-- QR Code Generation
-- QR-Based Check-In
-- QR-Based Check-Out
-- Grace Period Support
-- Automatic Overstay Calculation
-- Automatic Slot Release
+- Admin dashboard
+- Parking lot management
+- Parking slot management
+- Booking management
+- Payment management
+- User management
+- Check-in/check-out management
+- Revenue statistics
+- Booking statistics
+- Parking performance analytics
+- Vehicle distribution analytics
 
-#### Admin & Documentation
+### ⏱️ Automated Booking Lifecycle
 
-- Admin Dashboard APIs
-- Booking & Revenue Statistics
-- Swagger (OpenAPI) Documentation
+A scheduled background job handles expired bookings and no-show
+bookings.
 
-### 🚀 Future Enhancements
-
-- Google Maps Integration
-- Real-Time Slot Availability (WebSockets)
-- Admin Dashboard Frontend
-- React Frontend
-- Docker Deployment
-- CI/CD Pipeline
-
-## 🚀 Production Features
-
-- Layered Architecture (Routes → Controllers → Services → Database)
-- Transaction-Based Database Operations
-- Race Condition Protection
-- Soft Delete Strategy
-- Ownership-Based Authorization
-- QR-Based Secure Check-In
-- Automatic Booking Expiry Scheduler
-- Grace Period & Overstay Handling
-- Multi-Payment Architecture
-- Secure Razorpay Signature Verification
-- Modular Service Design
-- Swagger (OpenAPI) Documentation
-- Interactive API Testing
-
-## ⚙️ Installation
-
-```bash
-git clone <repository-url>
-
-cd Smart-Parking-Management-System/backend
-
-npm install
-
-cp .env.example .env
-
-npx prisma migrate dev
-
-npm run dev
-```
-
-After copying `.env.example` to `.env`, fill in your own values (database credentials, JWT secret, Razorpay keys, Nodemailer/Mailtrap credentials, etc.) before starting the server.
-
-## 📂 Project Structure
+The lifecycle includes:
 
 ```text
-backend/
-├── node_modules/
-├── prisma/
-│   ├── schema.prisma
-│   └── migrations/
-├── src/
-│   ├── config/
-│   │   ├── prisma.js
-│   │   ├── razorpay.js
-│   │   └── mail.config.js
-│   ├── constants/
-│   ├── controllers/
-│   ├── docs/
-│   ├── helpers/
-│   ├── jobs/
-│   ├── middleware/
-│   ├── routes/
-│   ├── services/
-│   ├── templates/
-│   ├── utils/
-│   ├── app.js
-│   └── server.js
-├── .env
-├── .env.example
-├── .gitignore
-├── package-lock.json
-├── package.json
-├── prisma.config.ts
-└── tsconfig.json
-docs/
-frontend/
-.gitignore
-LICENSE
-README.md
+PENDING_PAYMENT
+      ↓
+Payment completed
+      ↓
+CONFIRMED
+      ↓
+Check-in
+      ↓
+ACTIVE
+      ↓
+Check-out
+      ↓
+COMPLETED
 ```
 
-> **Note:** `.env` holds real secrets and is git-ignored — never commit it. `.env.example` lists the required variable names with empty/placeholder values so anyone cloning the repo knows what to configure.
+Expired and no-show bookings are automatically processed by the
+booking-expiry scheduler.
 
-## 🏛 Architecture
+---
+
+## 🧩 Backend Modules
+
+### Authentication
 
 ```text
-            Client
-               │
-               ▼
-        Express Routes
-               │
-               ▼
-         Controllers
-               │
-               ▼
-           Services
-               │
-               ▼
-          Prisma ORM
-               │
-               ▼
-          PostgreSQL
+POST   /api/v1/auth/register
+POST   /api/v1/auth/verify-email
+POST   /api/v1/auth/resend-verification
+POST   /api/v1/auth/login
+POST   /api/v1/auth/forgot-password
+POST   /api/v1/auth/reset-password
+POST   /api/v1/auth/logout
+GET    /api/v1/auth/me
 ```
 
-## 📘 API Documentation
+Admin user management is also provided through the authentication
+module.
 
-The backend APIs are documented using **Swagger (OpenAPI 3.0)**.
-
-During development, the interactive documentation is available at:
+### Parking Lots
 
 ```text
-http://localhost:5000/api-docs
+POST   /api/v1/parking-lots
+GET    /api/v1/parking-lots
+GET    /api/v1/parking-lots/:id
+PATCH  /api/v1/parking-lots/:id
+DELETE /api/v1/parking-lots/:id
 ```
 
-After deployment, this endpoint will be accessible through the deployed backend URL.
+### Parking Slots
 
-## 🗄 Database Design
+```text
+POST   /api/v1/parking-slots
+GET    /api/v1/parking-slots
+GET    /api/v1/parking-slots/:id
+PATCH  /api/v1/parking-slots/:id
+PATCH  /api/v1/parking-slots/:id/status
+DELETE /api/v1/parking-slots/:id
+```
 
-Core Entities
+### Vehicles
+
+Vehicle APIs support registration, retrieval, update, and deletion of
+user-owned vehicles.
+
+### Bookings
+
+```text
+POST   /api/v1/bookings
+GET    /api/v1/bookings
+GET    /api/v1/bookings/:bookingId
+PATCH  /api/v1/bookings/:bookingId/cancel
+POST   /api/v1/bookings/check-in
+PATCH  /api/v1/bookings/:bookingId/checkout
+GET    /api/v1/bookings/:bookingId/gate-status
+```
+
+### Payments
+
+Payment APIs support Razorpay order creation, payment verification,
+overstay payment processing, and payment history.
+
+### Availability
+
+```text
+GET /api/v1/availability
+```
+
+The availability service checks parking lots, slots, requested time
+ranges, and overlapping active bookings.
+
+### Dashboard
+
+```text
+GET /api/v1/dashboard/summary
+GET /api/v1/dashboard/bookings
+GET /api/v1/dashboard/revenue
+```
+
+Dashboard endpoints are protected and available to administrators.
+
+---
+
+## 🏛️ Architecture
+
+```text
+                    ┌──────────────────────┐
+                    │      React UI        │
+                    │     User / Admin     │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │       Express        │
+                    │        Routes        │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     Middleware       │
+                    │ JWT / RBAC / Errors  │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     Controllers      │
+                    │ HTTP request/response│
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │       Services       │
+                    │ Business Logic       │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │    Prisma ORM        │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     PostgreSQL       │
+                    └──────────────────────┘
+```
+
+External integrations:
+
+```text
+                 ┌───────────────┐
+                 │   Razorpay    │
+                 └───────┬───────┘
+                         │
+ParkSphere Backend ──────┼──── Payment
+                         │
+                 ┌───────▼───────┐
+                 │  Nodemailer   │
+                 │ / Mailtrap    │
+                 └───────────────┘
+```
+
+---
+
+## 🗄️ Database
+
+ParkSphere uses PostgreSQL with Prisma ORM.
+
+### Core entities
 
 - Users
 - Vehicles
@@ -218,189 +336,440 @@ Core Entities
 - Bookings
 - Payments
 
-Relationships
+### Major relationships
 
-- One User → Many Vehicles
-- One User → Many Bookings
-- One Parking Lot → Many Slots
-- One Booking → Multiple Payments
+```text
+User
+ ├── Vehicles
+ └── Bookings
 
-## 🛠 Tech Stack
+Parking Lot
+ ├── Parking Slots
+ └── Bookings
 
-### Frontend (Planned)
+Parking Slot
+ └── Bookings
 
-- React.js
+Booking
+ └── Payments
+```
+
+Prisma migrations are used to manage database schema changes.
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend
+
+- React 19
 - Vite
+- React Router
 - Axios
-- Socket.IO Client
+- Tailwind CSS
+- QRCode React
+- HTML5 QR Code
 
 ### Backend
 
 - Node.js
 - Express.js
-- PostgreSQL
 - Prisma ORM
+- PostgreSQL
 - JWT
 - Bcrypt
+- Cookie Parser
+- CORS
 - Nodemailer
 - Razorpay SDK
 - QRCode
 - Node Cron
-- Swagger (OpenAPI)
+- Swagger / OpenAPI
 
 ### External Services
 
-- Razorpay
-- Mailtrap (Development Email Testing)
-- Google Maps API (Planned)
+- Razorpay --- payment processing
+- Mailtrap / SMTP --- development email delivery
+- PostgreSQL --- relational database
 
-## 🏗 Development Principles
+---
 
-- Layered Architecture (Routes → Controllers → Services → Database)
-- RESTful API Design
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- Ownership-Based Authorization
-- Soft Delete Strategy
-- Prisma ORM
-- Modular Code Organization
-- Error Handling with Custom API Responses
+## 📂 Project Structure
 
-## 📦 Backend Modules
+```text
+smart-parking-management-system/
+│
+├── backend/
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── migrations/
+│   │
+│   ├── src/
+│   │   ├── config/
+│   │   ├── constants/
+│   │   ├── controllers/
+│   │   ├── docs/
+│   │   ├── helpers/
+│   │   ├── jobs/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── templates/
+│   │   ├── utils/
+│   │   ├── app.js
+│   │   └── server.js
+│   │
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── package.json
+│   └── prisma.config.ts
+│
+├── frontend/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+│
+├── docs/
+├── LICENSE
+└── README.md
+```
 
-### Authentication
+---
 
-- Register
-- Verify Email
-- Resend Verification Email
-- Login
-- Forgot Password
-- Reset Password
-- Logout
-- Get Current User
+## ⚙️ Environment Variables
 
-### Parking Lots
+The backend requires the following environment variables:
 
-- Create Parking Lot
-- Get Parking Lots
-- Get Parking Lot by ID
-- Update Parking Lot
-- Soft Delete Parking Lot
+```env
+DATABASE_URL=
 
-### Parking Slots
+JWT_SECRET=
+JWT_EXPIRES_IN=
 
-- Create Parking Slot
-- Get Parking Slots
-- Get Parking Slot by ID
-- Update Parking Slot
-- Update Slot Status
-- Soft Delete Parking Slot
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
 
-### Vehicles
+MAIL_HOST=
+MAIL_PORT=
+MAIL_USER=
+MAIL_PASS=
+MAIL_FROM="ParkSphere <no-reply@smartparking.com>"
 
-- Register Vehicle
-- Get My Vehicles
-- Get Vehicle by ID
-- Update Vehicle
-- Soft Delete Vehicle
+FRONTEND_URL=
+```
 
-### Bookings
+### Local development
 
-- Create Booking
-- Get My Bookings
-- Get Booking by ID
-- Cancel Booking
-- QR Check-In
-- QR Check-Out
-- Grace Period Handling
-- Overstay Calculation
-- Transaction-Based Booking Processing
-- Race Condition Protection
-- Automatic Booking Expiry
+The frontend development server normally runs on:
 
-### Payments
+```text
+http://localhost:5173
+```
 
-- Create Payment Order
-- Verify Razorpay Payment
-- Payment History
+The backend runs on:
 
-> Backend logic (order creation, signature verification, overstay billing) is implemented; end-to-end verification is pending frontend integration and has not yet been tested against a live checkout flow.
+```text
+http://localhost:5000
+```
 
-### Dashboard (Admin)
+Therefore, local development uses:
 
-- Dashboard Summary
-- Booking Statistics
-- Revenue Statistics
+```env
+FRONTEND_URL=http://localhost:5173
+```
 
-## 🚧 Project Status
+### Production
 
-**Current Phase:** Backend Completed ✅
+Production secrets must be configured through the hosting provider's
+environment-variable system.
 
-Core backend modules, authentication workflow, payment integration, admin analytics, and Swagger documentation have been implemented. Payment endpoints are complete on the backend but still await end-to-end testing once frontend integration begins.
+**Never commit `.env` or production credentials to GitHub.**
 
-The next phase focuses on frontend development and cloud deployment.
+---
 
-### Completed Modules
+## 🚀 Local Development
 
-- Authentication & Authorization
-- Email Verification
-- Password Recovery
-- Vehicle Management
-- Parking Lot Management
-- Parking Slot Management
-- Booking Lifecycle
-- Payment System (backend implemented; end-to-end testing pending)
-- QR Check-In
-- QR Check-Out
-- Booking Expiry Scheduler
-- Overstay Management
-- Admin Dashboard APIs
-- Swagger Documentation
+### 1. Clone the repository
 
-### Currently Working On
+```bash
+git clone https://github.com/Soumya-0712/smart-parking-management-system.git
+cd smart-parking-management-system
+```
 
-- Frontend integration for end-to-end payment testing
-- React.js frontend development
+### 2. Backend setup
 
-### 📌 Upcoming Modules
+```bash
+cd backend
+npm install
+```
 
-#### Backend
+Create a `.env` file using the required environment variables.
 
-- Google Maps Integration
-- Real-Time Slot Availability (WebSockets)
+Then configure the PostgreSQL database and run:
 
-#### Frontend
+```bash
+npx prisma migrate dev
+```
 
-- React.js User Portal
-- React.js Admin Dashboard
+Start the development server:
 
-#### DevOps
+```bash
+npm run dev
+```
 
-- Docker Containerization
-- CI/CD Pipeline
-- Cloud Deployment
+Backend:
 
-## 🚀 Roadmap
+```text
+http://localhost:5000
+```
+
+Health check:
+
+```text
+http://localhost:5000/health
+```
+
+### 3. Frontend setup
+
+Open another terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The Vite development server will normally be available at:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## 📘 API Documentation
+
+ParkSphere provides interactive Swagger/OpenAPI documentation.
+
+During local development:
+
+```text
+http://localhost:5000/api-docs
+```
+
+After deployment, the same documentation will be available through the
+deployed backend URL.
+
+---
+
+## 🔒 Security
+
+The application includes several security-oriented mechanisms:
+
+- JWT-based authentication
+- HTTP-only authentication cookies
+- Role-Based Access Control
+- Ownership-based authorization
+- Password hashing with Bcrypt
+- Email verification
+- Password reset workflow
+- Razorpay signature verification
+- Input validation in service/controller workflows
+- Soft deletion
+- Transaction-based critical database operations
+- Booking overlap protection
+- Race-condition protection
+
+Secrets such as database credentials, JWT secrets, Razorpay secrets, and
+mail credentials are supplied through environment variables.
+
+---
+
+## ⏱️ Booking State Management
+
+Bookings use a controlled lifecycle:
+
+```text
+PENDING_PAYMENT
+      │
+      ├── Payment expires ──► EXPIRED
+      │
+      ▼
+CONFIRMED
+      │
+      ├── No-show ──────────► EXPIRED
+      │
+      ▼
+ACTIVE
+      │
+      ├── Normal checkout ──► COMPLETED
+      │
+      └── Overstay ─────────► OVERSTAY_PAYMENT_PENDING
+                                      │
+                                      ▼
+                                  COMPLETED
+```
+
+Parking slot states include:
+
+```text
+AVAILABLE
+TEMP_RESERVED
+RESERVED
+OCCUPIED
+MAINTENANCE
+```
+
+---
+
+## 📊 Admin Analytics
+
+The admin analytics module uses live backend data rather than static
+frontend datasets.
+
+Current analytics include:
+
+- Total revenue
+- Weekly revenue
+- Booking revenue
+- Total bookings
+- Weekly bookings
+- Average booking value
+- Daily revenue
+- Parking-lot performance
+- Parking occupancy
+- Vehicle-type distribution
+- Revenue and booking insights
+
+---
+
+## 🧪 Testing Status
+
+The application has been tested incrementally while the major modules
+were developed.
+
+The current application has been tested across the main user and admin
+workflows, including:
+
+- Authentication
+- Email verification
+- Vehicle management
+- Parking lot management
+- Parking slot management
+- Availability
+- Booking lifecycle
+- Payment flow
+- QR check-in/check-out
+- Overstay handling
+- Booking expiry
+- Admin dashboard
+- Admin bookings
+- Admin payments
+- Admin users
+- Admin analytics
+
+Razorpay is currently intended to remain in **Test Mode** during
+deployment validation.
+
+---
+
+## 🚀 Deployment
+
+The application is currently being prepared for cloud deployment.
+
+Planned deployment flow:
+
+```text
+GitHub
+   │
+   ├──────────────► React/Vite Frontend
+   │
+   └──────────────► Node/Express Backend
+                           │
+                           ├──► PostgreSQL
+                           ├──► Razorpay
+                           └──► Email Service
+```
+
+Production deployment will use environment variables for:
+
+- PostgreSQL connection
+- JWT configuration
+- Razorpay credentials
+- Email configuration
+- Frontend URL
+
+The initial deployment will use **Razorpay Test Mode** for validation
+before switching to live payment credentials.
+
+---
+
+## 🗺️ Roadmap
+
+### Completed
 
 - [x] Authentication & Authorization
-- [x] Email Verification & Password Recovery
+- [x] Email Verification
+- [x] Password Recovery
+- [x] Vehicle Management
 - [x] Parking Lot Management
 - [x] Parking Slot Management
-- [x] Vehicle Management
+- [x] Parking Availability
 - [x] Booking Lifecycle
-- [x] Razorpay Integration (backend; pending E2E test)
-- [x] QR-Based Check-In
-- [x] QR-Based Check-Out
 - [x] Booking Expiry Scheduler
 - [x] Overstay Management
-- [x] Dashboard Analytics (incl. Booking History)
+- [x] Razorpay Integration
+- [x] QR-Based Check-In
+- [x] QR-Based Check-Out
+- [x] User Portal
+- [x] Admin Dashboard
+- [x] Admin Parking Management
+- [x] Admin Booking Management
+- [x] Admin Payment Management
+- [x] Admin User Management
+- [x] Admin Analytics
 - [x] Swagger Documentation
+- [x] End-to-End Application Testing
 
-- [ ] Google Maps Integration
-- [ ] Real-Time Slot Availability
-- [ ] Email Notifications (beyond auth flow)
-- [ ] Admin Dashboard Frontend
-- [ ] React Frontend
-- [ ] Docker Deployment
-- [ ] CI/CD Pipeline
-- [ ] Production Deployment
+### Planned / Future
+
+- [ ] Production cloud deployment
+- [ ] Production Razorpay live-mode configuration
+- [ ] Docker containerization
+- [ ] CI/CD pipeline
+- [ ] Real-time slot updates using WebSockets
+- [ ] Google Maps integration
+- [ ] Advanced monitoring and observability
+- [ ] Horizontal scaling / load balancing
+
+---
+
+## 📌 Current Project Status
+
+**Status: Application Complete --- Deployment Phase 🚀**
+
+The core ParkSphere application has been implemented across both the
+backend and frontend, and the major workflows have been tested
+end-to-end.
+
+The current focus is deployment and production configuration.
+
+---
+
+## 👥 Contributors
+
+- **Soumyadeep Paul**
+- **Toyen Lodh**
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+See the [LICENSE](LICENSE) file for details.
