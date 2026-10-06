@@ -68,6 +68,12 @@ function Payment() {
         );
       }
 
+      const isOverstay = booking.bookingStatus === "OVERSTAY_PAYMENT_PENDING";
+
+      const amount = isOverstay
+        ? Number(booking.overstayAmount)
+        : Number(booking.totalAmount);
+
       const options = {
         key: paymentData.razorpayKey,
 
@@ -77,7 +83,9 @@ function Payment() {
 
         name: "ParkSphere",
 
-        description: `Parking Booking - ${paymentData.bookingReference}`,
+        description: isOverstay
+          ? `Overstay Charge - ${paymentData.bookingReference}`
+          : `Parking Booking - ${paymentData.bookingReference}`,
 
         order_id: paymentData.orderId,
 
@@ -91,6 +99,7 @@ function Payment() {
           bookingId: booking.id,
           bookingReference: booking.bookingReference,
           paymentMethod,
+          paymentType: isOverstay ? "OVERSTAY" : "BOOKING",
         },
 
         theme: {
@@ -114,7 +123,11 @@ function Payment() {
 
             console.log("Payment verification response:", verifyResponse.data);
 
-            navigate(`/booking-confirmation/${booking.id}`);
+            if (isOverstay) {
+              navigate(`/booking-details/${booking.id}`);
+            } else {
+              navigate(`/booking-confirmation/${booking.id}`);
+            }
           } catch (error) {
             console.error("Payment verification failed:", error);
 
@@ -224,7 +237,23 @@ function Payment() {
     return null;
   }
 
-  const totalAmount = Number(booking.totalAmount);
+  const isOverstay = booking.bookingStatus === "OVERSTAY_PAYMENT_PENDING";
+
+  const totalAmount = isOverstay
+    ? Number(booking.overstayAmount)
+    : Number(booking.totalAmount);
+
+  const pageTitle = isOverstay ? "Overstay Payment" : "Payment";
+
+  const pageDescription = isOverstay
+    ? "Complete the overstay payment to finish your parking checkout."
+    : "Complete your payment to confirm the parking booking.";
+
+  const amountLabel = isOverstay ? "Overstay Fee" : "Total Amount";
+
+  const buttonLabel = isOverstay
+    ? `PAY OVERSTAY FEE ₹${totalAmount}`
+    : `PAY ₹${totalAmount}`;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#070B14] px-4 py-10 font-sans text-white sm:px-6 lg:px-8">
@@ -240,13 +269,25 @@ function Payment() {
         {/* Page Heading */}
         <section>
           <h1 className="text-3xl font-bold tracking-tight text-white">
-            Payment
+            {pageTitle}
           </h1>
 
-          <p className="mt-2 text-gray-400">
-            Complete your payment to confirm the parking booking.
-          </p>
+          <p className="mt-2 text-gray-400">{pageDescription}</p>
         </section>
+
+        {/* Overstay Notice */}
+        {isOverstay && (
+          <section className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-5">
+            <p className="text-sm font-semibold text-yellow-400">
+              Overstay Payment Required
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-gray-400">
+              Your parking session exceeded the scheduled end time. Please pay
+              the outstanding overstay fee to complete checkout.
+            </p>
+          </section>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -372,43 +413,72 @@ function Payment() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Rate</span>
+              {isOverstay ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      Overstay Duration
+                    </span>
 
-                <span className="text-sm font-medium text-gray-200">
-                  ₹{(totalAmount / booking.durationHours).toFixed(2)} / hour
-                </span>
-              </div>
+                    <span className="text-sm font-medium text-gray-200">
+                      {booking.overstayMinutes} Minutes
+                    </span>
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Booking Date</span>
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                    <span className="text-sm text-gray-500">Overstay Rate</span>
 
-                <span className="text-sm font-medium text-gray-200">
-                  {formatDate(booking.startTime)}
-                </span>
-              </div>
+                    <span className="text-sm font-medium text-gray-200">
+                      ₹{Number(booking.lot?.overstayRate || 0).toFixed(2)} /
+                      hour
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Rate</span>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Time</span>
+                    <span className="text-sm font-medium text-gray-200">
+                      ₹
+                      {(
+                        Number(booking.totalAmount) / booking.durationHours
+                      ).toFixed(2)}{" "}
+                      / hour
+                    </span>
+                  </div>
 
-                <span className="text-right text-sm font-medium text-gray-200">
-                  {formatTime(booking.startTime)} -{" "}
-                  {formatTime(booking.endTime)}
-                </span>
-              </div>
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                    <span className="text-sm text-gray-500">Booking Date</span>
 
-              <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-                <span className="text-sm text-gray-500">Duration</span>
+                    <span className="text-sm font-medium text-gray-200">
+                      {formatDate(booking.startTime)}
+                    </span>
+                  </div>
 
-                <span className="text-sm font-medium text-gray-200">
-                  {booking.durationHours} Hours
-                </span>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Time</span>
+
+                    <span className="text-right text-sm font-medium text-gray-200">
+                      {formatTime(booking.startTime)} -{" "}
+                      {formatTime(booking.endTime)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                    <span className="text-sm text-gray-500">Duration</span>
+
+                    <span className="text-sm font-medium text-gray-200">
+                      {booking.durationHours} Hours
+                    </span>
+                  </div>
+                </>
+              )}
 
               <div className="pt-2">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-white">
-                    Total Amount
+                    {amountLabel}
                   </span>
 
                   <span className="text-2xl font-bold text-cyan-400">
@@ -424,7 +494,7 @@ function Payment() {
               disabled={paymentLoading}
               className="mt-6 w-full rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 px-5 py-3 font-semibold text-white shadow-[0_0_20px_rgba(6,182,212,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_35px_rgba(6,182,212,0.45)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {paymentLoading ? "PROCESSING..." : `PAY ₹${totalAmount}`}
+              {paymentLoading ? "PROCESSING..." : buttonLabel}
             </button>
           </section>
         </div>

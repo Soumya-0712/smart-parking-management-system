@@ -11,6 +11,8 @@ import {
   resendVerificationEmail,
   forgotPassword,
   resetPassword,
+  getAllUsers,
+  getUserById,
 } from "../services/auth.services.js";
 
 const registerController = asyncHandler(async (req, res) => {
@@ -158,6 +160,28 @@ const resetPasswordController = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, {}, result.message));
 });
 
+const getAllUsersController = asyncHandler(async (req, res) => {
+  const users = await getAllUsers();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, users, "Users fetched successfully"));
+});
+
+const getUserByIdController = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId?.trim()) {
+    throw new ApiError(400, "User ID is required.");
+  }
+
+  const user = await getUserById(userId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User fetched successfully"));
+});
+
 export {
   registerController,
   loginController,
@@ -167,4 +191,6 @@ export {
   resendVerificationEmailController,
   forgotPasswordController,
   resetPasswordController,
+  getAllUsersController,
+  getUserByIdController,
 };

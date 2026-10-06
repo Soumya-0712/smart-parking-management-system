@@ -51,9 +51,8 @@ const verifyPaymentController = asyncHandler(async (req, res) => {
 
 const getPaymentController = asyncHandler(async (req, res) => {
   const filters = req.query;
-  const userId = req.user.id;
 
-  const payments = await getPayments(userId, filters);
+  const payments = await getPayments(req.user, filters);
 
   return res
     .status(200)

@@ -77,6 +77,15 @@ const getParkingSlots = async (filters) => {
 
   const parkingSlots = await prisma.parkingSlot.findMany({
     where,
+    include: {
+      lot: {
+        select: {
+          id: true,
+          name: true,
+          city: true,
+        },
+      },
+    },
     orderBy: [
       {
         floorNumber: "asc",

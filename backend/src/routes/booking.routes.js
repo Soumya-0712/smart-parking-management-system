@@ -1,5 +1,5 @@
 import { Router } from "express";
-
+import { USER_ROLES } from "../constants/roles.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 
 import {
@@ -9,7 +9,6 @@ import {
   cancelBookingController,
   checkOutController,
   checkInController,
-  gateStatusController,
 } from "../controllers/booking.controllers.js";
 
 const router = Router();
@@ -25,7 +24,5 @@ router.patch("/:bookingId/cancel", verifyJWT, cancelBookingController);
 router.post("/check-in", verifyJWT, checkInController);
 
 router.post("/check-out", verifyJWT, checkOutController);
-
-router.get("/:bookingId/gate-status", verifyJWT, gateStatusController);
 
 export default router;

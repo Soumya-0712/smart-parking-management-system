@@ -355,6 +355,83 @@ const resetPassword = async ({ token, newPassword }) => {
   };
 };
 
+/* Get All Users */
+const getAllUsers = async () => {
+  const users = await prisma.user.findMany({
+    where: {
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      isEmailVerified: true,
+      createdAt: true,
+
+      _count: {
+        select: {
+          vehicles: true,
+          bookings: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return users;
+};
+
+/* Get User By ID */
+const getUserById = async (userId) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      isEmailVerified: true,
+      createdAt: true,
+      updatedAt: true,
+
+      vehicles: {
+        where: {
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          vehicleNumber: true,
+          vehicleType: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+
+      _count: {
+        select: {
+          bookings: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  return user;
+};
+
 export {
   registerUser,
   loginUser,
@@ -362,4 +439,6 @@ export {
   resendVerificationEmail,
   forgotPassword,
   resetPassword,
+  getAllUsers,
+  getUserById,
 };

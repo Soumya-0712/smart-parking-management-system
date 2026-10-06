@@ -221,13 +221,13 @@ const CheckIn = () => {
 
                 {/* Corner Brackets */}
 
-                <div className="pointer-events-none absolute left-4 top-4 h-10 w-10 border-l-4 border-t-4 border-cyan-400 rounded-tl-lg"></div>
+                <div className="pointer-events-none absolute left-4 top-4 h-10 w-10 rounded-tl-lg border-l-4 border-t-4 border-cyan-400"></div>
 
-                <div className="pointer-events-none absolute right-4 top-4 h-10 w-10 border-r-4 border-t-4 border-cyan-400 rounded-tr-lg"></div>
+                <div className="pointer-events-none absolute right-4 top-4 h-10 w-10 rounded-tr-lg border-r-4 border-t-4 border-cyan-400"></div>
 
-                <div className="pointer-events-none absolute bottom-4 left-4 h-10 w-10 border-b-4 border-l-4 border-cyan-400 rounded-bl-lg"></div>
+                <div className="pointer-events-none absolute bottom-4 left-4 h-10 w-10 rounded-bl-lg border-b-4 border-l-4 border-cyan-400"></div>
 
-                <div className="pointer-events-none absolute bottom-4 right-4 h-10 w-10 border-b-4 border-r-4 border-cyan-400 rounded-br-lg"></div>
+                <div className="pointer-events-none absolute bottom-4 right-4 h-10 w-10 rounded-br-lg border-b-4 border-r-4 border-cyan-400"></div>
 
                 {/* Scan Line */}
 

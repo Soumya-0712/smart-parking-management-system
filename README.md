@@ -13,7 +13,7 @@ The project is being developed with a scalable backend architecture using Node.j
 
 ## 📖 Overview
 
-The Smart Parking Management System is a production-oriented backend application designed to digitize parking operations. It supports secure user authentication with email verification, vehicle management, online booking, Razorpay payment integration, QR code-based vehicle entry and exit, automatic booking expiry, intelligent overstay handling, and admin analytics — all documented through an interactive Swagger (OpenAPI) interface.
+The Smart Parking Management System is a production-oriented backend application designed to digitize parking operations. It supports secure user authentication with email verification, vehicle management, online booking, Razorpay payment integration, QR code-based vehicle entry and exit, automatic booking expiry, intelligent overstay handling, and admin analytics — all documented through an interactive Swagger (OpenAPI) interface .
 
 The project follows a layered architecture and emphasizes scalability, security, and maintainability using modern backend development practices.
 

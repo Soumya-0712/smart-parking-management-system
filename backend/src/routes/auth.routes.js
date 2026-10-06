@@ -11,8 +11,12 @@ import {
   resendVerificationEmailController,
   forgotPasswordController,
   resetPasswordController,
+  getAllUsersController,
+  getUserByIdController,
 } from "../controllers/auth.controllers.js";
 
+import { authorizeRoles } from "../middleware/role.middleware.js";
+import { USER_ROLES } from "../constants/roles.js";
 const router = Router();
 
 /**
@@ -70,5 +74,29 @@ router.post("/logout", verifyJWT, logoutController);
  * @access Private
  */
 router.get("/me", verifyJWT, getCurrentUser);
+
+/**
+ * @route GET /api/v1/auth/users
+ * @desc Get all users
+ * @access Admin
+ */
+router.get(
+  "/users",
+  verifyJWT,
+  authorizeRoles(USER_ROLES.ADMIN),
+  getAllUsersController,
+);
+
+/**
+ * @route GET /api/v1/auth/users/:userId
+ * @desc Get user by ID
+ * @access Admin
+ */
+router.get(
+  "/users/:userId",
+  verifyJWT,
+  authorizeRoles(USER_ROLES.ADMIN),
+  getUserByIdController,
+);
 
 export default router;

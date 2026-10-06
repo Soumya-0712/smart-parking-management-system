@@ -37,6 +37,9 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminUsers from "./pages/admin/AdminUsers";
 import CheckIn from "./pages/admin/CheckIn";
 import AdminCheckOut from "./pages/admin/AdminCheckout";
+import AdminParkingLotDetails from "./pages/admin/AdminParkingLotDetails";
+import AdminEditParkingLot from "./pages/admin/AdminEditParkingLot";
+import AdminAddParkingLot from "./pages/admin/AdminAddParkingLot";
 
 function App() {
   return (
@@ -92,6 +95,12 @@ function App() {
           <Route path="check-in" element={<CheckIn />} />
           <Route path="check-out" element={<AdminCheckOut />} />
           <Route path="parking-lots" element={<AdminParkingLots />} />
+          <Route path="parking-lots/:id" element={<AdminParkingLotDetails />} />
+          <Route
+            path="parking-lots/:id/edit"
+            element={<AdminEditParkingLot />}
+          />
+          <Route path="parking-lots/new" element={<AdminAddParkingLot />} />
           <Route path="parking-slots" element={<AdminParkingSlots />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="payments" element={<AdminPayments />} />

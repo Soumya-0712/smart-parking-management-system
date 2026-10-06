@@ -42,7 +42,11 @@ function Login() {
 
       console.log("Login successful:", response.data);
 
-      navigate("/dashboard");
+      if (response.data.data.role === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Login failed:", error);
 

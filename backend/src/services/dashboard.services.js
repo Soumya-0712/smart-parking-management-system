@@ -27,39 +27,41 @@ const getDashboardSummary = async () => {
     totalVehicles,
     totalParkingLots,
     totalParkingSlots,
-
     bookingStatusCounts,
-
     slotStatusCounts,
-
     todayRevenue,
-
     totalRevenue,
+    recentBookings,
   ] = await prisma.$transaction([
+    // Total Users
     prisma.user.count({
       where: {
         deletedAt: null,
       },
     }),
 
+    // Total Vehicles
     prisma.vehicle.count({
       where: {
         deletedAt: null,
       },
     }),
 
+    // Total Parking Lots
     prisma.parkingLot.count({
       where: {
         deletedAt: null,
       },
     }),
 
+    // Total Parking Slots
     prisma.parkingSlot.count({
       where: {
         deletedAt: null,
       },
     }),
 
+    // Booking Status Counts
     prisma.booking.groupBy({
       by: ["bookingStatus"],
 
@@ -68,6 +70,7 @@ const getDashboardSummary = async () => {
       },
     }),
 
+    // Slot Status Counts
     prisma.parkingSlot.groupBy({
       by: ["status"],
 
@@ -76,6 +79,7 @@ const getDashboardSummary = async () => {
       },
     }),
 
+    // Today's Revenue
     prisma.payment.aggregate({
       where: {
         paymentStatus: PAYMENT_STATUS.SUCCESS,
@@ -95,6 +99,7 @@ const getDashboardSummary = async () => {
       },
     }),
 
+    // Total Revenue
     prisma.payment.aggregate({
       where: {
         paymentStatus: PAYMENT_STATUS.SUCCESS,
@@ -106,6 +111,41 @@ const getDashboardSummary = async () => {
 
       _sum: {
         amount: true,
+      },
+    }),
+
+    // Recent Bookings
+    prisma.booking.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+
+      take: 5,
+
+      select: {
+        id: true,
+        bookingReference: true,
+        bookingStatus: true,
+        createdAt: true,
+
+        user: {
+          select: {
+            name: true,
+          },
+        },
+
+        lot: {
+          select: {
+            name: true,
+          },
+        },
+
+        slot: {
+          select: {
+            slotNumber: true,
+            floorNumber: true,
+          },
+        },
       },
     }),
   ]);
@@ -153,7 +193,6 @@ const getDashboardSummary = async () => {
 
     parking: {
       totalLots: totalParkingLots,
-
       totalSlots: totalParkingSlots,
 
       availableSlots: slotStats[SLOT_STATUS.AVAILABLE],
@@ -189,6 +228,9 @@ const getDashboardSummary = async () => {
 
       total: Number(totalRevenue._sum.amount ?? 0),
     },
+
+    // Latest 5 bookings
+    recentBookings,
   };
 };
 
@@ -218,13 +260,9 @@ const getBookingStatistics = async () => {
 
   const [
     totalBookings,
-
     todayBookings,
-
     weeklyBookings,
-
     monthlyBookings,
-
     bookingStatusCounts,
   ] = await prisma.$transaction([
     prisma.booking.count(),
@@ -316,8 +354,13 @@ const getRevenueStatistics = async () => {
     1,
   );
 
+  // Last 7 days including today
+  const sevenDaysStart = new Date(todayStart);
+  sevenDaysStart.setDate(todayStart.getDate() - 6);
+
   const revenueFilter = {
     paymentStatus: PAYMENT_STATUS.SUCCESS,
+
     paymentType: {
       in: [PAYMENT_TYPE.BOOKING, PAYMENT_TYPE.OVERSTAY],
     },
@@ -329,20 +372,17 @@ const getRevenueStatistics = async () => {
 
   const [
     totalRevenue,
-
     todayRevenue,
-
     weeklyRevenue,
-
     monthlyRevenue,
-
     bookingRevenue,
-
     overstayRevenue,
-
     refundAmount,
-
     paymentStatusCounts,
+    dailyRevenuePayments,
+    parkingLots,
+    parkingBookings,
+    vehicleBookings,
   ] = await prisma.$transaction([
     prisma.payment.aggregate({
       where: revenueFilter,
@@ -438,6 +478,99 @@ const getRevenueStatistics = async () => {
         paymentStatus: true,
       },
     }),
+
+    // Payments used for the 7-day revenue chart
+    prisma.payment.findMany({
+      where: {
+        ...revenueFilter,
+
+        paidAt: {
+          gte: sevenDaysStart,
+          lte: todayEnd,
+        },
+      },
+
+      select: {
+        amount: true,
+        paidAt: true,
+      },
+
+      orderBy: {
+        paidAt: "asc",
+      },
+    }),
+
+    // Parking lots
+    prisma.parkingLot.findMany({
+      where: {
+        deletedAt: null,
+      },
+
+      select: {
+        id: true,
+        name: true,
+
+        slots: {
+          where: {
+            deletedAt: null,
+          },
+
+          select: {
+            id: true,
+            status: true,
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: "asc",
+      },
+    }),
+
+    // Successful bookings with their parking lot and payments
+    prisma.booking.findMany({
+      where: {
+        payments: {
+          some: {
+            paymentStatus: PAYMENT_STATUS.SUCCESS,
+
+            paymentType: {
+              in: [PAYMENT_TYPE.BOOKING, PAYMENT_TYPE.OVERSTAY],
+            },
+          },
+        },
+      },
+
+      select: {
+        id: true,
+        lotId: true,
+
+        payments: {
+          where: {
+            paymentStatus: PAYMENT_STATUS.SUCCESS,
+
+            paymentType: {
+              in: [PAYMENT_TYPE.BOOKING, PAYMENT_TYPE.OVERSTAY],
+            },
+          },
+
+          select: {
+            amount: true,
+          },
+        },
+      },
+    }),
+
+    // Bookings with vehicle type
+    prisma.booking.findMany({
+      select: {
+        vehicle: {
+          select: {
+            vehicleType: true,
+          },
+        },
+      },
+    }),
   ]);
 
   // ---------------------------------
@@ -453,6 +586,110 @@ const getRevenueStatistics = async () => {
   paymentStatusCounts.forEach((item) => {
     paymentStatus[item.paymentStatus] = item._count.paymentStatus;
   });
+
+  // ---------------------------------
+  // Daily Revenue Statistics
+  // ---------------------------------
+
+  const dailyRevenueMap = {};
+
+  for (let i = 0; i < 7; i += 1) {
+    const date = new Date(sevenDaysStart);
+    date.setDate(sevenDaysStart.getDate() + i);
+
+    const key = date.toISOString().split("T")[0];
+
+    dailyRevenueMap[key] = {
+      day: date.toLocaleDateString("en-US", {
+        weekday: "short",
+      }),
+      amount: 0,
+    };
+  }
+
+  dailyRevenuePayments.forEach((payment) => {
+    if (!payment.paidAt) {
+      return;
+    }
+
+    const key = new Date(payment.paidAt).toISOString().split("T")[0];
+
+    if (dailyRevenueMap[key]) {
+      dailyRevenueMap[key].amount += Number(payment.amount ?? 0);
+    }
+  });
+
+  const dailyRevenue = Object.values(dailyRevenueMap);
+
+  // ---------------------------------
+  // Parking Lot Performance
+  // ---------------------------------
+
+  const parkingPerformance = parkingLots.map((lot) => {
+    const totalSlots = lot.slots.length;
+
+    const occupiedSlots = lot.slots.filter(
+      (slot) => slot.status === SLOT_STATUS.OCCUPIED,
+    ).length;
+
+    const occupancy =
+      totalSlots > 0 ? Math.round((occupiedSlots / totalSlots) * 100) : 0;
+
+    const lotBookings = parkingBookings.filter(
+      (booking) => booking.lotId === lot.id,
+    );
+
+    const bookings = lotBookings.length;
+
+    const revenue = lotBookings.reduce((total, booking) => {
+      const bookingRevenue = booking.payments.reduce(
+        (paymentTotal, payment) => paymentTotal + Number(payment.amount ?? 0),
+        0,
+      );
+
+      return total + bookingRevenue;
+    }, 0);
+
+    return {
+      name: lot.name,
+      bookings,
+      revenue,
+      occupancy,
+    };
+  });
+
+  // ---------------------------------
+  // Vehicle Distribution
+  // ---------------------------------
+
+  const vehicleBookingCounts = {};
+
+  vehicleBookings.forEach((booking) => {
+    const vehicleType = booking.vehicle?.vehicleType;
+
+    if (!vehicleType) {
+      return;
+    }
+
+    if (!vehicleBookingCounts[vehicleType]) {
+      vehicleBookingCounts[vehicleType] = 0;
+    }
+
+    vehicleBookingCounts[vehicleType] += 1;
+  });
+
+  const totalVehicleBookings = vehicleBookings.length;
+
+  const vehicleDistribution = Object.entries(vehicleBookingCounts).map(
+    ([type, bookings]) => ({
+      type,
+      bookings,
+      percentage:
+        totalVehicleBookings > 0
+          ? Math.round((bookings / totalVehicleBookings) * 100)
+          : 0,
+    }),
+  );
 
   // ---------------------------------
   // Response
@@ -474,6 +711,15 @@ const getRevenueStatistics = async () => {
     refundAmount: Number(refundAmount._sum.refundAmount ?? 0),
 
     paymentStatus,
+
+    // Analytics data
+    dailyRevenue,
+
+    parkingPerformance,
+
+    vehicleDistribution,
+
+    totalVehicleBookings,
   };
 };
 

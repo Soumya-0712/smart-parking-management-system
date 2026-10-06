@@ -106,14 +106,6 @@ function AdminCheckOut() {
       setCheckoutError("");
       setCheckoutResult(null);
 
-      /*
-       * The QR contains the booking's qrToken.
-       *
-       * We first send the token to the backend.
-       * The backend will identify the booking and
-       * process checkout.
-       */
-
       const response = await api.post("/bookings/check-out", {
         qrToken,
       });
@@ -157,6 +149,9 @@ function AdminCheckOut() {
       hour12: true,
     });
   }
+
+  const isOverstay =
+    checkoutResult?.bookingStatus === "OVERSTAY_PAYMENT_PENDING";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#070B14] px-4 py-10 font-sans text-white sm:px-6 lg:px-8">
@@ -237,18 +232,42 @@ function AdminCheckOut() {
 
         {/* Checkout Result */}
         {checkoutResult && (
-          <section className="rounded-2xl border border-green-500/30 bg-[#0a0f1c]/90 p-8 shadow-2xl">
+          <section
+            className={`rounded-2xl border bg-[#0a0f1c]/90 p-8 shadow-2xl ${
+              isOverstay ? "border-yellow-500/30" : "border-green-500/30"
+            }`}
+          >
             <div className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-green-500/30 bg-green-500/10">
-                <span className="text-3xl text-green-400">✓</span>
+              <div
+                className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full border ${
+                  isOverstay
+                    ? "border-yellow-500/30 bg-yellow-500/10"
+                    : "border-green-500/30 bg-green-500/10"
+                }`}
+              >
+                <span
+                  className={`text-3xl ${
+                    isOverstay ? "text-yellow-400" : "text-green-400"
+                  }`}
+                >
+                  {isOverstay ? "!" : "✓"}
+                </span>
               </div>
 
-              <h2 className="mt-5 text-2xl font-bold text-green-400">
-                Checkout Successful
+              <h2
+                className={`mt-5 text-2xl font-bold ${
+                  isOverstay ? "text-yellow-400" : "text-green-400"
+                }`}
+              >
+                {isOverstay
+                  ? "Overstay Payment Required"
+                  : "Checkout Successful"}
               </h2>
 
               <p className="mt-2 text-gray-400">
-                Vehicle has been successfully checked out.
+                {isOverstay
+                  ? "The vehicle has an outstanding overstay charge."
+                  : "Vehicle has been successfully checked out."}
               </p>
             </div>
 
@@ -265,7 +284,13 @@ function AdminCheckOut() {
               <div className="flex items-center justify-between border-b border-gray-800 pb-4">
                 <span className="text-gray-500">Status</span>
 
-                <span className="rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400">
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                    isOverstay
+                      ? "border-yellow-500/20 bg-yellow-500/10 text-yellow-400"
+                      : "border-green-500/20 bg-green-500/10 text-green-400"
+                  }`}
+                >
                   {checkoutResult.bookingStatus?.replaceAll("_", " ")}
                 </span>
               </div>
