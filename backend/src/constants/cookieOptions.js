@@ -1,5 +1,5 @@
 export const cookieOptions = {
   httpOnly: true,
-  secure: false,
-  sameSite: "strict",
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 };
